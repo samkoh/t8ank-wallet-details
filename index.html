@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Web3 Dashboard - Monitor wallet addresses and token balances on BNB chain">
+  <title>Web3 Wallet Monitor</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
+      <span id="theme-icon">☀️</span>
+    </button>
+    <header>
+      <h1>🔷 Web3 Wallet Monitor</h1>
+      <p class="subtitle">BNB Chain Token Balance Tracker</p>
+      <div class="status-bar">
+        <span id="last-update">Last update: Never</span>
+        <span id="next-update">Next update in: 30s</span>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="input-group">
+        <input 
+          type="text" 
+          id="wallet-name" 
+          placeholder="Wallet name"
+          autocomplete="off"
+        >
+        <input 
+          type="text" 
+          id="wallet-input" 
+          placeholder="Enter wallet address (0x...)"
+          autocomplete="off"
+        >
+        <button id="add-wallet-btn">Add Wallet</button>
+      </div>
+      <button id="clear-all-btn" class="secondary">Clear All</button>
+    </div>
+
+    <div id="wallet-list" class="wallet-list">
+      <div class="empty-state">
+        <p>No wallets added yet. Add a wallet address to start monitoring.</p>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-item">
+        <span class="label">Token:</span>
+        <span class="value" id="token-address">0x327753B71F11DF3d6809B2436667475Fab8C956E</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Chain:</span>
+        <span class="value">BNB Smart Chain</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Price (USDT):</span>
+        <span class="value" id="token-price">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Icon Generator</title>
+</head>
+<body>
+  <h1>PWA Icon Generator</h1>
+  <p>Open this file in a browser and the icons will be generated automatically.</p>
+  <canvas id="icon192" width="192" height="192"></canvas>
+  <canvas id="icon512" width="512" height="512"></canvas>
+  <div id="downloads"></div>
+
+  <script>
+    function generateIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#1a1a2e');
+      gradient.addColorStop(1, '#0f0f23');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Draw wallet icon (simplified)
+      ctx.fillStyle = '#4a90e2';
+      ctx.font = `bold ${size * 0.4}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🔷', size / 2, size / 2);
+      
+      // Download link
+      const link = document.createElement('a');
+      link.download = `icon-${size}.png`;
+      link.href = canvas.toDataURL();
+      link.textContent = `Download icon-${size}.png`;
+      link.style.display = 'block';
+      link.style.margin = '10px';
+      document.getElementById('downloads').appendChild(link);
+    }
+    
+    generateIcon(document.getElementById('icon192'), 192);
+    generateIcon(document.getElementById('icon512'), 512);
+  </script>
+</body>
+</html>
+

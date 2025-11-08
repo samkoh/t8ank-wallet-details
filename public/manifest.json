@@ -1,0 +1,19 @@
+{
+  "name": "Web3 Wallet Monitor",
+  "short_name": "Wallet Monitor",
+  "description": "Monitor wallet addresses and token balances on BNB chain",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#1a1a2e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
