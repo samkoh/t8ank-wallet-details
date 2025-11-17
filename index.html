@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Web3 Dashboard - Monitor wallet addresses and token balances on BNB chain">
-  <title>Web3 Wallet Monitor</title>
+  <title>Wallet Monitor</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/svg+xml" href="/icon.svg">
   <link rel="apple-touch-icon" href="/icon.svg">
@@ -14,10 +14,15 @@
 <body>
   <div class="container">
     <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
-      <span id="theme-icon">☀️</span>
+      <span id="theme-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <path d="M10 2V4M10 16V18M18 10H16M4 10H2M15.66 4.34L14.24 5.76M5.76 14.24L4.34 15.66M15.66 15.66L14.24 14.24M5.76 5.76L4.34 4.34" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </span>
     </button>
     <header>
-      <h1>🔷 Web3 Wallet Monitor</h1>
+      <h1>🔷 Wallet Monitor</h1>
       <p class="subtitle">BNB Chain Token Balance Tracker</p>
       <div class="status-bar">
         <span id="last-update">Last update: Never</span>
@@ -53,7 +58,7 @@
     <div class="info-panel">
       <div class="info-item">
         <span class="label">Token:</span>
-        <span class="value" id="token-address">0x327753B71F11DF3d6809B2436667475Fab8C956E</span>
+        <span class="value" id="token-address">0x3277...956E</span>
       </div>
       <div class="info-item">
         <span class="label">Chain:</span>

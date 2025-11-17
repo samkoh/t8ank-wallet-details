@@ -1,5 +1,5 @@
 {
-  "name": "Web3 Wallet Monitor",
+  "name": "Wallet Monitor",
   "short_name": "Wallet Monitor",
   "description": "Monitor wallet addresses and token balances on BNB chain",
   "start_url": "/",
@@ -16,4 +16,3 @@
     }
   ]
 }
-
