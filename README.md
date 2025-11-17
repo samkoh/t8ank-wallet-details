@@ -1,4 +1,4 @@
-# Web3 Wallet Monitor Dashboard
+# Wallet Monitor Dashboard
 
 A Progressive Web App (PWA) to monitor wallet addresses and token balances on BNB Smart Chain.
 

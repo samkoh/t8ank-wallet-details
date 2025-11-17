@@ -2,12 +2,12 @@ import { createPublicClient, http, formatUnits } from 'viem';
 import { bsc } from 'viem/chains';
 import './styles.css';
 
-// Configuration
-const TOKEN_ADDRESS = '0x327753B71F11DF3d6809B2436667475Fab8C956E';
-const TOKEN_DECIMALS = 18; // Standard ERC20 decimals, adjust if needed
-const BSC_RPC_URL = 'https://bsc-dataseed1.binance.org/'; // Free public RPC
-const REFRESH_INTERVAL = 30000; // 30 seconds
-const PRICE_API_URL = 'https://www.okx.com/api/v5/market/ticker?instId=';
+// Configuration - Load from environment variables
+const TOKEN_ADDRESS = import.meta.env.VITE_TOKEN_ADDRESS;
+const TOKEN_DECIMALS = parseInt(import.meta.env.VITE_TOKEN_DECIMALS); // Standard ERC20 decimals, adjust if needed
+const BSC_RPC_URL = import.meta.env.VITE_BSC_RPC_URL; // Free public RPC
+const REFRESH_INTERVAL = parseInt(import.meta.env.VITE_REFRESH_INTERVAL); // 30 seconds
+const PRICE_API_URL = import.meta.env.VITE_PRICE_API_URL;
 
 // ERC20 ABI for balanceOf
 const ERC20_ABI = [
@@ -48,23 +48,55 @@ let countdownTimer = null;
 let countdown = 30;
 
 // Pre-populate with default wallets if empty
-const defaultWallets = [
-  { name: 'G', address: '0x06a9f861862e120d2fd03E9650f033C49aFDD486' },
-  { name: 'S', address: '0xc20662c62CbdD15158017d83462486682033070A' },
-  { name: 'MT', address: '0x62490673B8D8f37162Cd1886bD499adbA8C1b4D7' },
-  { name: 'J', address: '0xE5F8b35bbD79251589517c41B5199C85f0Bf980d' },
-  { name: 'Jolly', address: '0x24dEA71Db19BA1483f3d074cD66a43DEfF6A4952' },
-  { name: 'Mela', address: '0x8143d908306fA7E64dD149c906e9fBA1efE76c01' },
-  { name: 'Meli', address: '0x0E428c6CcF9753BE30A66BaeBc1ECe2a04ed94d6' },
-  { name: 'D_2', address: '0x40f1a9E0840dcF069fd74FB83792F59849a30c3B' },
-  { name: 'D_3', address: '0x918fc14aFBEBBa1a0E9182d23971f5dD46873a9B' }
-];
+// Load from environment variable or use fallback
+let defaultWallets = [];
+try {
+  const envWallets = import.meta.env.VITE_DEFAULT_WALLETS;
+  if (envWallets) {
+    defaultWallets = JSON.parse(envWallets);
+  } else {
+    // Fallback to hardcoded values if env var is not set
+    defaultWallets = [
+      { name: 'G', address: '0x06a9f861862e120d2fd03E9650f033C49aFDD486', cost: 0.00369 },
+      { name: 'S', address: '0xc20662c62CbdD15158017d83462486682033070A', cost: 0.003505 },
+      { name: 'MT', address: '0x62490673B8D8f37162Cd1886bD499adbA8C1b4D7', cost: 0.004398 },
+      { name: 'J', address: '0xE5F8b35bbD79251589517c41B5199C85f0Bf980d', cost: 0 },
+      { name: 'Jolly', address: '0x24dEA71Db19BA1483f3d074cD66a43DEfF6A4952', cost: 0 },
+      { name: 'Mela', address: '0x8143d908306fA7E64dD149c906e9fBA1efE76c01', cost: 0 },
+      { name: 'Meli', address: '0x0E428c6CcF9753BE30A66BaeBc1ECe2a04ed94d6', cost: 0 },
+      { name: 'D_2', address: '0x40f1a9E0840dcF069fd74FB83792F59849a30c3B', cost: 0 },
+      { name: 'D_3', address: '0x918fc14aFBEBBa1a0E9182d23971f5dD46873a9B', cost: 0 }
+    ];
+  }
+} catch (error) {
+  console.error('Error parsing VITE_DEFAULT_WALLETS from .env:', error);
+  // Fallback to hardcoded values on parse error
+  defaultWallets = [
+    { name: 'G', address: '0x06a9f861862e120d2fd03E9650f033C49aFDD486', cost: 0.00369 },
+    { name: 'S', address: '0xc20662c62CbdD15158017d83462486682033070A', cost: 0.003505 },
+    { name: 'MT', address: '0x62490673B8D8f37162Cd1886bD499adbA8C1b4D7', cost: 0.004398 },
+    { name: 'J', address: '0xE5F8b35bbD79251589517c41B5199C85f0Bf980d', cost: 0 },
+    { name: 'Jolly', address: '0x24dEA71Db19BA1483f3d074cD66a43DEfF6A4952', cost: 0 },
+    { name: 'Mela', address: '0x8143d908306fA7E64dD149c906e9fBA1efE76c01', cost: 0 },
+    { name: 'Meli', address: '0x0E428c6CcF9753BE30A66BaeBc1ECe2a04ed94d6', cost: 0 },
+    { name: 'D_2', address: '0x40f1a9E0840dcF069fd74FB83792F59849a30c3B', cost: 0 },
+    { name: 'D_3', address: '0x918fc14aFBEBBa1a0E9182d23971f5dD46873a9B', cost: 0 }
+  ];
+}
 
 // Initialize with default wallets if empty
 if (wallets.length === 0) {
   wallets = defaultWallets.map(w => ({
     name: w.name,
-    address: w.address.toLowerCase()
+    address: w.address.toLowerCase(),
+    cost: w.cost || 0
+  }));
+  saveWallets();
+} else {
+  // Ensure all existing wallets have cost property
+  wallets = wallets.map(w => ({
+    ...w,
+    cost: w.cost !== undefined ? w.cost : 0
   }));
   saveWallets();
 }
@@ -158,7 +190,8 @@ function addWallet() {
   
   wallets.push({
     name: name,
-    address: addressLower
+    address: addressLower,
+    cost: 0
   });
   saveWallets();
   if (walletNameInput) walletNameInput.value = '';
@@ -214,6 +247,8 @@ function renderWallets() {
             <th>Address</th>
             <th>Token Balance</th>
             <th>Total Price (USDT)</th>
+            <th>Avg Cost</th>
+            <th>P/L %</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -223,12 +258,19 @@ function renderWallets() {
               <td class="wallet-name">${escapeHtml(wallet.name)}</td>
               <td class="wallet-address-cell">
                 <span class="wallet-address">${formatAddress(wallet.address)}</span>
-                <button class="copy-btn" data-address="${wallet.address}" title="Copy address">📋</button>
               </td>
               <td class="balance-value" data-address="${wallet.address}">Loading...</td>
               <td class="usdt-value" data-address="${wallet.address}">Loading...</td>
+              <td class="cost-value" data-address="${wallet.address}">${formatUSDT(wallet.cost || 0)}</td>
+              <td class="pl-percent" data-address="${wallet.address}">-</td>
               <td>
-                <button class="remove-btn-small" onclick="removeWallet('${wallet.address}')" title="Remove">×</button>
+                <button class="remove-btn-small" onclick="removeWallet('${wallet.address}')" title="Remove">
+                  <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 3.5H13M4.5 3.5V2C4.5 1.45 4.95 1 5.5 1H8.5C9.05 1 9.5 1.45 9.5 2V3.5M11.5 3.5V14C11.5 14.55 11.05 15 10.5 15H3.5C2.95 15 2.5 14.55 2.5 14V3.5H11.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.5 7V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M8.5 7V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           `).join('')}
@@ -240,6 +282,8 @@ function renderWallets() {
             <td class="total-balance"><strong>Loading...</strong></td>
             <td class="total-usdt"><strong>Loading...</strong></td>
             <td></td>
+            <td></td>
+            <td></td>
           </tr>
         </tfoot>
       </table>
@@ -248,14 +292,6 @@ function renderWallets() {
   
   // Update all wallets
   wallets.forEach(wallet => updateWallet(wallet.address));
-  
-  // Add event listeners for copy buttons
-  document.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const address = btn.getAttribute('data-address');
-      copyAddress(address, btn);
-    });
-  });
   
   // Update totals
   updateTotals();
@@ -299,6 +335,7 @@ async function updateWallet(address) {
     const balance = await getTokenBalance(address);
     const balanceEl = document.querySelector(`.balance-value[data-address="${address}"]`);
     const usdtEl = document.querySelector(`.usdt-value[data-address="${address}"]`);
+    const plEl = document.querySelector(`.pl-percent[data-address="${address}"]`);
     
     if (balanceEl) {
       balanceEl.textContent = formatBalance(balance);
@@ -311,15 +348,29 @@ async function updateWallet(address) {
       usdtEl.textContent = 'Price loading...';
     }
     
+    // Update P/L %
+    if (plEl && tokenPrice !== null) {
+      const wallet = wallets.find(w => w.address === address.toLowerCase());
+      if (wallet) {
+        const cost = wallet.cost || 0;
+        const plPercent = calculatePLPercent(tokenPrice, cost);
+        plEl.innerHTML = formatPLPercent(plPercent);
+      }
+    } else if (plEl) {
+      plEl.innerHTML = '-';
+    }
+    
     // Update totals after updating individual wallet
     setTimeout(() => updateTotals(), 100);
   } catch (error) {
     console.error(`Error updating wallet ${address}:`, error);
     const balanceEl = document.querySelector(`.balance-value[data-address="${address}"]`);
     const usdtEl = document.querySelector(`.usdt-value[data-address="${address}"]`);
+    const plEl = document.querySelector(`.pl-percent[data-address="${address}"]`);
     
     if (balanceEl) balanceEl.textContent = 'Error';
     if (usdtEl) usdtEl.textContent = 'Error';
+    if (plEl) plEl.innerHTML = '-';
     
     // Update totals even if there's an error
     setTimeout(() => updateTotals(), 100);
@@ -429,6 +480,7 @@ function updateAllWalletPrices() {
   wallets.forEach(wallet => {
     const usdtEl = document.querySelector(`.usdt-value[data-address="${wallet.address}"]`);
     const balanceEl = document.querySelector(`.balance-value[data-address="${wallet.address}"]`);
+    const plEl = document.querySelector(`.pl-percent[data-address="${wallet.address}"]`);
     
     if (usdtEl && balanceEl) {
       const balanceText = balanceEl.textContent.trim();
@@ -439,6 +491,13 @@ function updateAllWalletPrices() {
           usdtEl.textContent = formatUSDT(usdtValue);
         }
       }
+    }
+    
+    // Update P/L %
+    if (plEl) {
+      const cost = wallet.cost || 0;
+      const plPercent = calculatePLPercent(tokenPrice, cost);
+      plEl.innerHTML = formatPLPercent(plPercent);
     }
   });
   
@@ -483,6 +542,22 @@ function formatUSDT(value) {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2
   })}`;
+}
+
+function calculatePLPercent(currentPrice, cost) {
+  if (!cost || cost === 0) return null;
+  if (!currentPrice || currentPrice === 0) return null;
+  
+  const plPercent = ((currentPrice - cost) / cost) * 100;
+  return plPercent;
+}
+
+function formatPLPercent(plPercent) {
+  if (plPercent === null || plPercent === undefined) return '-';
+  
+  const sign = plPercent >= 0 ? '+' : '';
+  const colorClass = plPercent >= 0 ? 'pl-positive' : 'pl-negative';
+  return `<span class="${colorClass}">${sign}${plPercent.toFixed(2)}%</span>`;
 }
 
 function startAutoRefresh() {
@@ -578,7 +653,22 @@ function toggleTheme() {
 
 function updateThemeIcon(theme) {
   if (themeIcon) {
-    themeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
+    if (theme === 'light') {
+      // Moon icon for light theme (click to switch to dark)
+      themeIcon.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8.5 2C8.5 2 10 4 10 6.5C10 9 8.5 11 8.5 11C11.5 11 14 8.5 14 5.5C14 2.5 11.5 2 8.5 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        </svg>
+      `;
+    } else {
+      // Sun icon for dark theme (click to switch to light)
+      themeIcon.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <path d="M10 2V4M10 16V18M18 10H16M4 10H2M15.66 4.34L14.24 5.76M5.76 14.24L4.34 15.66M15.66 15.66L14.24 14.24M5.76 5.76L4.34 4.34" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      `;
+    }
   }
 }
 

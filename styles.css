@@ -70,6 +70,12 @@ html[data-theme="light"] body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.theme-toggle svg {
+  display: block;
+  flex-shrink: 0;
+  color: var(--text-primary);
+}
+
 .theme-toggle:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -124,6 +130,7 @@ header h1 {
   margin-bottom: 15px;
 }
 
+#wallet-name,
 #wallet-input {
   flex: 1;
   padding: 12px 16px;
@@ -136,11 +143,13 @@ header h1 {
   transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
+#wallet-name:focus,
 #wallet-input:focus {
   outline: none;
   border-color: var(--accent);
 }
 
+#wallet-name::placeholder,
 #wallet-input::placeholder {
   color: var(--text-secondary);
 }
@@ -269,7 +278,8 @@ button.secondary:hover {
 }
 
 .wallet-table .balance-value,
-.wallet-table .usdt-value {
+.wallet-table .usdt-value,
+.wallet-table .cost-value {
   font-weight: 600;
   font-size: 1rem;
   font-family: 'Courier New', monospace;
@@ -277,6 +287,24 @@ button.secondary:hover {
 
 .wallet-table .usdt-value {
   color: var(--accent);
+}
+
+.wallet-table .cost-value {
+  color: var(--text-secondary);
+}
+
+.wallet-table .pl-percent {
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+}
+
+.pl-positive {
+  color: var(--success);
+}
+
+.pl-negative {
+  color: var(--error);
 }
 
 .remove-btn-small {
@@ -294,6 +322,11 @@ button.secondary:hover {
   cursor: pointer;
   color: white;
   transition: all 0.2s ease;
+}
+
+.remove-btn-small svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .remove-btn-small:hover {
@@ -497,11 +530,11 @@ button.secondary:hover {
     opacity: 0.5;
   }
 }
-
 .balance-value:empty::before,
 .usdt-value:empty::before {
   content: 'Loading...';
   animation: pulse 1.5s ease-in-out infinite;
   color: var(--text-secondary);
 }
+
 
